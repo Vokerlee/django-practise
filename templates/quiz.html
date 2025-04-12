@@ -1,1 +1,114 @@
 {% extends "base_page.html" %}
+
+{% load quiz_tags %}
+
+{% block content %}
+
+<div class="section">
+    <h1 class="center-align">Квиз по техническим индикаторам</h1>
+
+    <!-- Display Messages -->
+    {% if messages %}
+        <div class="row">
+            {% for message in messages %}
+                <div class="col s12">
+                    <div class="card-panel {% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue-grey{% endif %} lighten-2">
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Start Quiz Button -->
+    <div class="row">
+        <div class="col s12 center-align">
+            <a href="#quiz-modal" class="modal-trigger btn waves-effect waves-light">
+                Начать квиз
+                <i class="material-icons right">play_arrow</i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Review Answers Button (Shown if Results Exist) -->
+    {% if request.session.quiz_results %}
+        <div class="row">
+            <div class="col s12 center-align">
+                <a href="#review-answers-modal" class="modal-trigger btn waves-effect waves-light blue">
+                    Посмотреть ответы
+                    <i class="material-icons right">visibility</i>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="modal">
+        <div class="modal-content">
+            <h4>Квиз по техническим индикаторам</h4>
+            <form method="POST" id="quiz-form">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="card-panel">
+                        <h6>Вопрос {{ question.id }}: {{ question.text }}</h6>
+                        {% for answer in question.answers %}
+                            <p>
+                                <label>
+                                    <input type="radio" name="{{ question.name }}" value="{{ answer|truncatewords:50 }}" required />
+                                    <span>{{ answer|truncatewords:50 }}</span>
+                                </label>
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% empty %}
+                    <p>Вопросы недоступны. Добавьте больше индикаторов.</p>
+                {% endfor %}
+                <div class="modal-footer">
+                    <a href="#!" class="modal-close btn-flat">Отмена</a>
+                    <button type="submit" class="btn waves-effect waves-light">
+                        Отправить ответы
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Answers Modal -->
+    {% if request.session.quiz_results %}
+        <div id="review-answers-modal" class="modal">
+            <div class="modal-content">
+                <h4>Результаты квиза</h4>
+                {% for q_id, result in request.session.quiz_results.answers.items %}
+                    <div class="card-panel">
+                        <h6>Вопрос {{ forloop.counter }}: {{ questions|lookup:forloop.counter0|lookup:'text' }}</h6>
+                        {% for answer in questions|lookup:forloop.counter0|lookup:'answers' %}
+                            <p>
+                                <label>
+                                    <input type="radio" disabled
+                                           {% if answer == result.user_answer %}checked{% endif %}
+                                           class="{% if answer == result.correct_answer and answer == result.user_answer %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif answer == result.user_answer %}red-text{% endif %}" />
+                                    <span class="{% if answer == result.correct_answer and answer == result.user_answer %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif answer == result.user_answer %}red-text{% endif %}">
+                                        {{ answer|truncatewords:50 }}
+                                    </span>
+                                </label>
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close btn-flat">Закрыть</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Custom Filter for List Lookup -->
+<script>
+    function lookupFilter(list, index, key) {
+        return list[index][key];
+    }
+</script>
+
+{% endblock %}
