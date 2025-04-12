@@ -19,7 +19,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('tech-indicators', views.tech_indicators, name='indicators'),
+    path('tech-indicators', views.tech_indicators, name='tech_indicators'),
     path('tech-indicators/delete/<int:indicator_id>', views.delete_indicator, name='delete_indicator'),
     path('quiz', views.quiz, name="quiz"),
 ]

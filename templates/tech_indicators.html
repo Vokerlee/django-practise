@@ -1,5 +1,7 @@
 {% extends "base_page.html" %}
 
+{% block title %}Технические индикаторы{% endblock %}
+
 {% block content %}
 
 <div class="section">
@@ -28,54 +30,43 @@
         </div>
     </div>
 
-    <!-- List of Indicators -->
+    <!-- Indicators Table -->
     <div class="row">
-        {% for indicator in indicators %}
-            <div class="col s12 m6 l4">
-                <div class="card blue-grey darken-1">
-                    <div class="card-content white-text">
-                        <span class="card-title">{{ indicator.name }}</span>
-                        <p><strong>Описание:</strong> {{ indicator.description }}</p>
-                        <p><strong>Формула:</strong> {{ indicator.formula }}</p>
-                        <p><strong>Рекомендации:</strong> {{ indicator.recommendation }}</p>
-                    </div>
-                    <div class="card-action">
-                        <a href="#modal-{{ indicator.id }}" class="modal-trigger btn-small waves-effect waves-light blue">
-                            Подробнее
-                            <i class="material-icons right">info</i>
-                        </a>
-
-                        <!-- Delete Form -->
-                        <form method="POST" action="{% url 'delete_indicator' indicator.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-small red waves-effect waves-light" onclick="return confirm('Вы уверены, что хотите удалить индикатор {{ indicator.name }}?');">
-                                Удалить
-                                <i class="material-icons right">delete</i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal for Indicator Details -->
-            <div id="modal-{{ indicator.id }}" class="modal">
-                <div class="modal-content">
-                    <h4>{{ indicator.name }}</h4>
-                    <p><strong>Описание:</strong> {{ indicator.description }}</p>
-                    <p><strong>Формула:</strong> {{ indicator.formula }}</p>
-                    <p><strong>Рекомендации по использованию:</strong> {{ indicator.recommendation }}</p>
-                </div>
-                <div class="modal-footer">
-                    <a href="#!" class="modal-close btn-flat">Закрыть</a>
-                </div>
-            </div>
-        {% endfor %}
-
-        {% if not indicators %}
-            <div class="col s12">
-                <p class="center-align">Пока нет индикаторов. Добавьте первый!</p>
-            </div>
-        {% endif %}
+        <div class="col s12">
+            <table class="highlight centered responsive-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Формула</th>
+                        <th>Рекомендация</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for indicator in indicators %}
+                        <tr>
+                            <td>{{ indicator.name }}</td>
+                            <td>{{ indicator.description|truncatewords:30 }}</td>
+                            <td><span class="mathjax">\( {{ indicator.formula|default:"Нет формулы" }} \)</span></td>
+                            <td>{{ indicator.recommendation|truncatewords:30 }}</td>
+                            <td>
+                                <a href="#edit-indicator-modal-{{ indicator.id }}" class="modal-trigger btn-flat">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                                <a href="{% url 'delete_indicator' indicator.id %}" class="btn-flat confirm-delete">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">Нет индикаторов. Добавьте новый!</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Modal for Adding New Indicator -->
@@ -118,6 +109,81 @@
             </form>
         </div>
     </div>
+
+    <!-- Edit Indicator Modals -->
+    {% for indicator in indicators %}
+        <div id="edit-indicator-modal-{{ indicator.id }}" class="modal">
+            <div class="modal-content">
+                <h4>Редактировать индикатор</h4>
+                <form method="POST" action="{% url 'tech_indicators' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="indicator_id" value="{{ indicator.id }}">
+                    <div class="input-field">
+                        <input id="edit_name_{{ indicator.id }}" name="name" type="text" value="{{ indicator.name }}" required>
+                        <label for="edit_name_{{ indicator.id }}" class="active">Название</label>
+                    </div>
+                    <div class="input-field">
+                        <textarea id="edit_description_{{ indicator.id }}" name="description" class="materialize-textarea" required>{{ indicator.description }}</textarea>
+                        <label for="edit_description_{{ indicator.id }}" class="active">Описание</label>
+                    </div>
+                    <div class="input-field">
+                        <textarea id="edit_formula_{{ indicator.id }}" name="formula" class="materialize-textarea" required>{{ indicator.formula }}</textarea>
+                        <label for="edit_formula_{{ indicator.id }}" class="active">Формула (LaTeX)</label>
+                    </div>
+                    <div id="edit_formula_preview_{{ indicator.id }}" class="mathjax" style="min-height: 50px; margin: 10px 0;">
+                        \( {{ indicator.formula|default:"" }} \)
+                    </div>
+                    <div class="input-field">
+                        <textarea id="edit_recommendation_{{ indicator.id }}" name="recommendation" class="materialize-textarea" required>{{ indicator.recommendation }}</textarea>
+                        <label for="edit_recommendation_{{ indicator.id }}" class="active">Рекомендация</label>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close btn-flat">Отмена</a>
+                        <button type="submit" name="edit_indicator" class="btn waves-effect waves-light">
+                            Сохранить
+                            <i class="material-icons right">save</i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Formula preview for add modal
+        var formulaInput = document.getElementById('formula');
+        var formulaPreview = document.getElementById('formula-preview');
+        if (formulaInput && formulaPreview) {
+            formulaInput.addEventListener('input', function() {
+                formulaPreview.innerHTML = this.value ? '\\(' + this.value + '\\)' : '';
+                MathJax.typeset();
+            });
+        }
+
+        // Formula preview for edit modals
+        {% for indicator in indicators %}
+            var editFormulaInput_{{ indicator.id }} = document.getElementById('edit_formula_{{ indicator.id }}');
+            var editFormulaPreview_{{ indicator.id }} = document.getElementById('edit_formula_preview_{{ indicator.id }}');
+            if (editFormulaInput_{{ indicator.id }} && editFormulaPreview_{{ indicator.id }}) {
+                editFormulaInput_{{ indicator.id }}.addEventListener('input', function() {
+                    editFormulaPreview_{{ indicator.id }}.innerHTML = this.value ? '\\(' + this.value + '\\)' : '';
+                    MathJax.typeset();
+                });
+            }
+        {% endfor %}
+
+        // Confirm delete
+        var deleteButtons = document.querySelectorAll('.confirm-delete');
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить этот индикатор?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}
