@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}База знаний технического анализа{% endblock %}</title>
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #424242;
+        }
+        .brand-logo {
+            font-weight: 500;
+            font-size: 1.8rem;
+        }
+        nav {
+            background-color: #0288d1; /* Material blue */
+        }
+        .nav-wrapper {
+            padding: 0 20px;
+        }
+        footer.page-footer {
+            background-color: #0277bd;
+            padding-top: 20px;
+        }
+        .content {
+            min-height: 80vh;
+        }
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal {
+            max-width: 600px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="/" class="brand-logo">База знаний технического анализа</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/tech-indicators">Технические индикаторы</a></li>
+                <li><a href="/quiz">Пройти квиз</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidenav -->
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/tech-indicators">Технические индикаторы</a></li>
+        <li><a href="/quiz">Пройти квиз</a></li>
+    </ul>
+
+    <!-- Main Content Area -->
+    <div class="container content mt-4">
+        {% block content %}
+        <!-- Child templates will inject content here -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">База знаний технического анализа</h5>
+                    <p class="grey-text text-lighten-4">© {% now "Y" %} Roman Glaz. Все права защищены.</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Дополнительно</h5>
+                    <ul>
+                        <li><a class="grey-text text-lighten-3" href="#!">Связаться с нами</a></li>
+                        <li><a class="grey-text text-lighten-3" href="#!">О проекте</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Sidenav
+            var sidenavs = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(sidenavs);
+
+            // Initialize Modals
+            var modals = document.querySelectorAll('.modal');
+            M.Modal.init(modals, {
+                opacity: 0.5,
+                inDuration: 250,
+                outDuration: 250,
+                dismissible: true
+            });
+        });
+    </script>
+</body>
+</html>
