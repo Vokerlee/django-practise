@@ -50,15 +50,25 @@
                 {% csrf_token %}
                 {% for question in questions %}
                     <div class="card-panel">
-                        <h6>Вопрос {{ question.id }}: {{ question.text }}</h6>
-                        {% for index, answer in question.answers|enum %}
-                            <p>
-                                <label>
-                                    <input type="radio" name="{{ question.name }}" value="{{ index }}" required />
-                                    <span>{{ answer|truncatewords:50 }}</span>
-                                </label>
-                            </p>
-                        {% endfor %}
+                        <h6>Вопрос {{ question.id }}: {{ question.text|default:"Нет текста" }}</h6>
+                        {% if question.answers %}
+                            {% for index, answer in question.answers|enum %}
+                                <p>
+                                    <label style="display: block; margin: 10px 0;">
+                                        <input type="radio" name="{{ question.name }}" value="{{ index }}" required class="with-gap" />
+                                        <span class="mathjax">
+                                            {% if "Какая формула у индикатора" in question.text %}
+                                                \( {{ answer|default:"Нет ответа" }} \)
+                                            {% else %}
+                                                {{ answer|truncatewords:50|default:"Нет ответа" }}
+                                            {% endif %}
+                                        </span>
+                                    </label>
+                                </p>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: red;">Ошибка: Нет ответов для вопроса {{ question.id }}</p>
+                        {% endif %}
                     </div>
                 {% empty %}
                     <p>Вопросы не доступны. Добавьте больше индикаторов.</p>
@@ -88,8 +98,12 @@
                                     <input type="radio" disabled
                                            {% if result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}checked{% endif %}
                                            class="{% if answer == result.correct_answer and result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}red-text{% endif %}" />
-                                    <span class="{% if answer == result.correct_answer and result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}red-text{% endif %}">
-                                        {{ answer|truncatewords:50|default:"Ответ не загружен" }}
+                                    <span class="{% if answer == result.correct_answer and result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}red-text{% endif %} mathjax">
+                                        {% if "Какая формула у индикатора" in result.question_text %}
+                                            \( {{ answer|default:"Ответ не загружен" }} \)
+                                        {% else %}
+                                            {{ answer|truncatewords:50|default:"Ответ не загружен" }}
+                                        {% endif %}
                                     </span>
                                 </label>
                             </p>

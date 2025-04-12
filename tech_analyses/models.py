@@ -1,7 +1,7 @@
 from django.db import models
 
 class TechnicalIndicator(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Название")
+    name = models.CharField(max_length=100, verbose_name="Название", unique=True)
     description = models.TextField(verbose_name="Описание")
     formula = models.TextField(verbose_name="Формула")
     recommendation = models.TextField(verbose_name="Рекомендации по использованию")
