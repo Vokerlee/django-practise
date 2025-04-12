@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <!-- Review Answers Button (Shown if Results Exist) -->
+    <!-- Review Answers Button -->
     {% if request.session.quiz_results %}
         <div class="row">
             <div class="col s12 center-align">
@@ -51,17 +51,17 @@
                 {% for question in questions %}
                     <div class="card-panel">
                         <h6>Вопрос {{ question.id }}: {{ question.text }}</h6>
-                        {% for answer in question.answers %}
+                        {% for index, answer in question.answers|enum %}
                             <p>
                                 <label>
-                                    <input type="radio" name="{{ question.name }}" value="{{ answer|truncatewords:50 }}" required />
+                                    <input type="radio" name="{{ question.name }}" value="{{ index }}" required />
                                     <span>{{ answer|truncatewords:50 }}</span>
                                 </label>
                             </p>
                         {% endfor %}
                     </div>
                 {% empty %}
-                    <p>Вопросы недоступны. Добавьте больше индикаторов.</p>
+                    <p>Вопросы не доступны. Добавьте больше индикаторов.</p>
                 {% endfor %}
                 <div class="modal-footer">
                     <a href="#!" class="modal-close btn-flat">Отмена</a>
@@ -81,15 +81,15 @@
                 <h4>Результаты квиза</h4>
                 {% for q_id, result in request.session.quiz_results.answers.items %}
                     <div class="card-panel">
-                        <h6>Вопрос {{ forloop.counter }}: {{ questions|lookup:forloop.counter0|lookup:'text' }}</h6>
-                        {% for answer in questions|lookup:forloop.counter0|lookup:'answers' %}
+                        <h6>Вопрос {{ forloop.counter }}: {{ result.question_text|default:"Вопрос не загружен" }}</h6>
+                        {% for index, answer in result.question_answers|enum %}
                             <p>
                                 <label>
                                     <input type="radio" disabled
-                                           {% if answer == result.user_answer %}checked{% endif %}
-                                           class="{% if answer == result.correct_answer and answer == result.user_answer %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif answer == result.user_answer %}red-text{% endif %}" />
-                                    <span class="{% if answer == result.correct_answer and answer == result.user_answer %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif answer == result.user_answer %}red-text{% endif %}">
-                                        {{ answer|truncatewords:50 }}
+                                           {% if result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}checked{% endif %}
+                                           class="{% if answer == result.correct_answer and result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}red-text{% endif %}" />
+                                    <span class="{% if answer == result.correct_answer and result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}green-text{% elif answer == result.correct_answer %}yellow-text{% elif result.user_answer_index|default_if_none:"" == index|stringformat:'s' %}red-text{% endif %}">
+                                        {{ answer|truncatewords:50|default:"Ответ не загружен" }}
                                     </span>
                                 </label>
                             </p>
@@ -103,12 +103,5 @@
         </div>
     {% endif %}
 </div>
-
-<!-- Custom Filter for List Lookup -->
-<script>
-    function lookupFilter(list, index, key) {
-        return list[index][key];
-    }
-</script>
 
 {% endblock %}

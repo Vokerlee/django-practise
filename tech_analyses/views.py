@@ -57,17 +57,33 @@ def quiz(request):
         score = 0
         answers = {}
         correct_answers = request.session.get('quiz_correct_answers', {})
+        questions = request.session.get('quiz_questions', [])
 
         for i in range(1, total_questions + 1):
             question_key = f'question_{i}'
-            user_answer = request.POST.get(question_key)
+            user_answer_index = request.POST.get(question_key)
             correct_answer = correct_answers.get(question_key)
+            question_data = questions[i-1] if i <= len(questions) else {}
+            question_answers = question_data.get('answers', [])
+
+            # Convert index to answer text, handle None
+            user_answer = None
+            if user_answer_index is not None and user_answer_index.isdigit():
+                idx = int(user_answer_index)
+                if 0 <= idx < len(question_answers):
+                    user_answer = question_answers[idx]
+
+            is_correct = user_answer == correct_answer
             answers[question_key] = {
+                'user_answer_index': user_answer_index,
                 'user_answer': user_answer,
                 'correct_answer': correct_answer,
-                'is_correct': user_answer == correct_answer
+                'is_correct': is_correct,
+                'question_text': question_data.get('text', ''),
+                'question_answers': question_answers
             }
-            if user_answer == correct_answer:
+
+            if is_correct:
                 score += 1
 
         # Store results in session for review
@@ -144,6 +160,7 @@ def quiz(request):
 
     # Store correct answers in session
     request.session['quiz_correct_answers'] = correct_answers
+    request.session['quiz_questions'] = questions
     request.session.modified = True
 
     return render(request, "quiz.html", {
