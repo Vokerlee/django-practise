@@ -67,21 +67,21 @@
     <!-- Navigation Bar -->
     <nav>
         <div class="nav-wrapper">
-            <a href="/" class="brand-logo">База знаний технического анализа</a>
+            <a href="{% url 'home' %}" class="brand-logo">База знаний технического анализа</a>
             <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
-                <li><a href="/">Главная</a></li>
-                <li><a href="/tech-indicators">Технические индикаторы</a></li>
-                <li><a href="/quiz">Пройти квиз</a></li>
+                <li><a href="{% url 'home' %}">Главная</a></li>
+                <li><a href="{% url 'tech_indicators' %}">Технические индикаторы</a></li>
+                <li><a href="{% url 'quiz' %}">Пройти квиз</a></li>
             </ul>
         </div>
     </nav>
 
     <!-- Mobile Sidenav -->
     <ul class="sidenav" id="mobile-nav">
-        <li><a href="/">Главная</a></li>
-        <li><a href="/tech-indicators">Технические индикаторы</a></li>
-        <li><a href="/quiz">Пройти квиз</a></li>
+        <li><a href="{% url 'home' %}">Главная</a></li>
+        <li><a href="{% url 'tech_indicators' %}">Технические индикаторы</a></li>
+        <li><a href="{% url 'quiz' %}">Пройти квиз</a></li>
     </ul>
 
     <!-- Main Content Area -->

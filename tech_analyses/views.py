@@ -84,7 +84,7 @@ def quiz(request):
             question_key = f'question_{i}'
             user_answer_index = request.POST.get(question_key)
             correct_answer = correct_answers.get(question_key)
-            question_data = questions[i-1] if i <= len(questions) else {}
+            question_data = questions[i - 1] if i <= len(questions) else {}
             question_answers = question_data.get('answers', [])
 
             # Convert index to answer text, handle None
@@ -165,8 +165,6 @@ def quiz(request):
         correct_answer = getattr(indicator, answer_field)
         other_indicators = [ind for ind in indicators if ind != indicator]
         wrong_answers = [getattr(ind, answer_field) for ind in random.sample(other_indicators, min(4, len(other_indicators)))]
-        if len(wrong_answers) < 4:
-            wrong_answers.extend(["Вариант заглушка"] * (4 - len(wrong_answers)))
         answers = wrong_answers[:4]
         answers.append(correct_answer)
         random.shuffle(answers)

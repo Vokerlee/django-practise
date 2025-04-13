@@ -1,1 +1,70 @@
 {% extends "base_page.html" %}
+
+{% block title %}База знаний технического анализа{% endblock %}
+
+{% block content %}
+
+<div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+        <h1 class="header center teal-text text-darken-2">База знаний технического анализа</h1>
+        <div class="row center">
+            <h5 class="header col s12 light">
+                Добро пожаловать в интерактивную платформу для изучения технического анализа!
+                Погрузитесь в мир индикаторов с подробными описаниями и формулами,
+                а затем проверьте свои знания в увлекательном квизе.
+            </h5>
+        </div>
+        <div class="row center">
+            <a href="{% url 'tech_indicators' %}"
+               class="btn-large waves-effect waves-light teal darken-2 hoverable">
+                Технические индикаторы
+                <i class="material-icons right">insights</i>
+            </a>
+            <a href="{% url 'quiz' %}"
+               class="btn-large waves-effect waves-light orange darken-1 hoverable"
+               style="margin-left: 20px;">
+                Пройти квиз
+                <i class="material-icons right">quiz</i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section">
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <span class="card-title teal-text">Изучайте индикаторы</span>
+                        <p>
+                            Узнайте всё о технических индикаторах: их описание, формулы
+                            (например, \( RSI = 100 - \frac{100}{1 + RS} \)) и рекомендации.
+                            Добавляйте, редактируйте и удаляйте записи с удобным интерфейсом.
+                        </p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'tech_indicators' %}" class="teal-text">Перейти к индикаторам</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <span class="card-title orange-text">Тестируйте знания</span>
+                        <p>
+                            Проверьте, как хорошо вы разбираетесь в техническом анализе,
+                            с помощью квиза из 10 вопросов. Получайте результаты с цветной
+                            разметкой и улучшайте свои навыки!
+                        </p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'quiz' %}" class="orange-text">Начать квиз</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
