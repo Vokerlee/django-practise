@@ -19,35 +19,56 @@ def tech_indicators(request):
         formula = request.POST.get("formula")
         recommendation = request.POST.get("recommendation")
 
-        # Basic validation
-        if name and description and formula and recommendation:
-            TechnicalIndicator.objects.create(
-                name=name,
-                description=description,
-                formula=formula,
-                recommendation=recommendation
-            )
-            messages.success(request, "Новый индикатор успешно добавлен!")
-            return redirect("indicators")
+        if not all([name, description, formula, recommendation]):
+            messages.error(request, "Все поля обязательны для заполнения.")
+            return redirect('tech_indicators')
+
+        if 'add_indicator' in request.POST:
+            try:
+                TechnicalIndicator.objects.create(
+                    name=name,
+                    description=description,
+                    formula=formula,
+                    recommendation=recommendation
+                )
+                messages.success(request, f"Индикатор '{name}' успешно добавлен!")
+            except Exception as e:
+                messages.error(request, f"Ошибка при добавлении индикатора: {str(e)}")
+        elif 'edit_indicator' in request.POST:
+            indicator_id = request.POST.get('indicator_id')
+            if not indicator_id:
+                messages.error(request, "ID индикатора не указан.")
+                return redirect('tech_indicators')
+            try:
+                indicator = TechnicalIndicator.objects.get(id=indicator_id)
+                indicator.name = name
+                indicator.description = description
+                indicator.formula = formula
+                indicator.recommendation = recommendation
+                indicator.save()
+                messages.success(request, f"Индикатор '{name}' успешно обновлен!")
+            except TechnicalIndicator.DoesNotExist:
+                messages.error(request, "Индикатор не найден.")
+            except Exception as e:
+                messages.error(request, f"Ошибка при обновлении индикатора: {str(e)}")
         else:
-            messages.error(request, "Все поля должны быть заполнены.")
+            messages.error(request, "Неверное действие.")
+
+        return redirect('tech_indicators')
 
     # Render the page with the list of indicators
     return render(request, "tech_indicators.html", {"indicators": indicators})
 
 def delete_indicator(request, indicator_id):
-    if request.method == "POST":
-        try:
-            indicator = TechnicalIndicator.objects.get(id=indicator_id)
-            indicator_name = indicator.name
-            indicator.delete()
-            messages.success(request, f"Индикатор '{indicator_name}' успешно удален!")
-            return redirect("indicators")
-        except TechnicalIndicator.DoesNotExist:
-            messages.error(request, "Индикатор не найден.")
-            return redirect("indicators")
+    try:
+        indicator = TechnicalIndicator.objects.get(id=indicator_id)
+        name = indicator.name
+        indicator.delete()
+        messages.success(request, f"Индикатор '{name}' успешно удален!")
+    except TechnicalIndicator.DoesNotExist:
+        messages.error(request, "Индикатор не найден.")
 
-    return HttpResponseBadRequest("Недопустимый метод запроса.")
+    return redirect('tech_indicators')
 
 def quiz(request):
     total_questions = 10
