@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
-from django.core.cache import cache
-from django.contrib import messages
-from django.http import HttpResponseBadRequest
-from .models import TechnicalIndicator
 import random
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import TechnicalIndicator
 
 def index(request):
     return render(request, "index.html")
@@ -114,27 +113,23 @@ def quiz(request):
             'answers': answers
         }
 
-        # Set statistics message
-        if score <= 1:
-            stat_message = f"{score}/{total_questions} — Проигравший!"
-        elif score == 2:
-            stat_message = f"{score}/{total_questions} — Не особо умён!"
-        elif score == 3:
-            stat_message = f"{score}/{total_questions} — Типичный парень!"
-        elif score == 4:
-            stat_message = f"{score}/{total_questions} — Неплохо!"
-        elif score == 5:
-            stat_message = f"{score}/{total_questions} — Средний результат!"
-        elif score == 6:
-            stat_message = f"{score}/{total_questions} — Хороший результат!"
-        elif score == 7:
-            stat_message = f"{score}/{total_questions} — Отлично!"
-        elif score == 8:
-            stat_message = f"{score}/{total_questions} — Великолепно!"
-        elif score == 9:
-            stat_message = f"{score}/{total_questions} — Почти гений!"
-        else:
-            stat_message = f"{score}/{total_questions} — Гений технического анализа!"
+        # Score-to-message mapping
+        score_messages = {
+            0: "Проигравший!",
+            1: "Проигравший!",
+            2: "Не особо умён!",
+            3: "Типичный парень!",
+            4: "Неплохо!",
+            5: "Средний результат!",
+            6: "Хороший результат!",
+            7: "Отлично!",
+            8: "Великолепно!",
+            9: "Почти гений!",
+            10: "Гений технического анализа!"
+        }
+
+        score_message = score_messages.get(score, 'Гений технического анализа!')
+        stat_message = f"{score}/{total_questions} — {score_message}"
 
         messages.success(request, stat_message)
         return redirect('quiz')
@@ -142,7 +137,8 @@ def quiz(request):
     # Generate quiz questions
     indicators = list(TechnicalIndicator.objects.all())
     if len(indicators) < total_questions:
-        messages.error(request, f"Недостаточно индикаторов для квиза. Нужно минимум {total_questions}.")
+        messages.error(request,
+            f"Недостаточно индикаторов для квиза. Нужно минимум {total_questions}.")
         return render(request, "quiz.html", {'indicators': indicators})
 
     random.shuffle(indicators)
@@ -164,7 +160,8 @@ def quiz(request):
         # Generate answer options
         correct_answer = getattr(indicator, answer_field)
         other_indicators = [ind for ind in indicators if ind != indicator]
-        wrong_answers = [getattr(ind, answer_field) for ind in random.sample(other_indicators, min(4, len(other_indicators)))]
+        wrong_answers = [getattr(ind, answer_field) for ind in
+            random.sample(other_indicators, min(4, len(other_indicators)))]
         answers = wrong_answers[:4]
         answers.append(correct_answer)
         random.shuffle(answers)
